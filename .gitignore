@@ -4,3 +4,5 @@ doc/
 *~
 .project
 .DS_Store
+lib/
+.lein-deps-sum
