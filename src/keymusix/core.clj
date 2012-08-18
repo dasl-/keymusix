@@ -1,64 +1,70 @@
 (ns keymusix.core)
 
-(require '[seesaw.core :as s])
+;; (require '[seesaw.core :as s])
 (import java.awt.event.KeyEvent)
 (use 'overtone.live)
 
 
-(definst keyboard [volume 1.0 freq 440]
+(definst keyboard [freq 440 volume 1.0]
   (let [src (sin-osc freq)
         env (env-gen (perc 0.001 0.3) :action FREE)]
     (* volume 1 src env)))
 
 (defn play-keyboard [ notename ]
-  (keyboard :freq (midi->hz ( note notename))))
+  (println (name notename))
+  (println (do (note notename)))
+  (keyboard :freq (midi->hz (note notename))))
 
-(defn map-note [e]
-  (let [k (.getKeyCode e)]
+(defn map-note [k]
+  (println (format "%x" k))
     (cond
-      (= KeyEvent/VK_E k) (play-keyboard :c4)
-      (= KeyEvent/VK_T k) (play-keyboard :d4)
-      (= KeyEvent/VK_A k) (play-keyboard :e4)
-      (= KeyEvent/VK_O k) (play-keyboard :g4)
-      (= KeyEvent/VK_I k) (play-keyboard :a4)
-      (= KeyEvent/VK_N k) (play-keyboard :c3)
-      (= KeyEvent/VK_S k) (play-keyboard :d3)
-      (= KeyEvent/VK_H k) (play-keyboard :e3)
-      (= KeyEvent/VK_R k) (play-keyboard :g3)
-      (= KeyEvent/VK_D k) (play-keyboard :a3)
-      (= KeyEvent/VK_L k) (play-keyboard :c5)
-      (= KeyEvent/VK_C k) (play-keyboard :d5)
-      (= KeyEvent/VK_U k) (play-keyboard :e5)
-      (= KeyEvent/VK_M k) (play-keyboard :g5)
-      (= KeyEvent/VK_W k) (play-keyboard :a5)
-      (= KeyEvent/VK_F k) (play-keyboard :c2)
-      (= KeyEvent/VK_G k) (play-keyboard :d2)
-      (= KeyEvent/VK_Y k) (play-keyboard :e2)
-      (= KeyEvent/VK_P k) (play-keyboard :g2)
-      (= KeyEvent/VK_B k) (play-keyboard :a2)
-      (= KeyEvent/VK_V k) (play-keyboard :c6)
-      (= KeyEvent/VK_K k) (play-keyboard :d6)
-      (= KeyEvent/VK_J k) (play-keyboard :e6)
-      (= KeyEvent/VK_X k) (play-keyboard :g6)
-      (= KeyEvent/VK_Q k) (play-keyboard :a6)
-      (= KeyEvent/VK_Z k) (play-keyboard :c1)
-      )
-    )
+      (= 0x0E k) (play-keyboard :c4) ;; e
+      (= 0x11 k) (play-keyboard :d4) ;; t
+      (= 0x00 k) (play-keyboard :e4) ;; a
+      (= 0x1F k) (play-keyboard :g4) ;; o
+      (= 0x22 k) (play-keyboard :a4) ;; i
+      (= 0x2D k) (play-keyboard :c3) ;; n
+      (= 0x01 k) (play-keyboard :d3) ;; s
+      (= 0x04 k) (play-keyboard :e3) ;; h
+      (= 0x0F k) (play-keyboard :g3) ;; r
+      (= 0x02 k) (play-keyboard :a3) ;; d
+      (= 0x25 k) (play-keyboard :c5) ;; l
+      (= 0x08 k) (play-keyboard :d5) ;; c
+      (= 0x20 k) (play-keyboard :e5) ;; u
+      (= 0x2E k) (play-keyboard :g5) ;; m
+      (= 0x0D k) (play-keyboard :a5) ;; w
+      (= 0x03 k) (play-keyboard :c2) ;; f
+      (= 0x05 k) (play-keyboard :d2) ;; g
+      (= 0x10 k) (play-keyboard :e2) ;; y
+      (= 0x23 k) (play-keyboard :g2) ;; p
+      (= 0x0B k) (play-keyboard :a2) ;; b
+      (= 0x09 k) (play-keyboard :c6) ;; v
+      (= 0x28 k) (play-keyboard :d6) ;; k
+      (= 0x26 k) (play-keyboard :e6) ;; j
+      (= 0x07 k) (play-keyboard :g6) ;; x
+      (= 0x0C k) (play-keyboard :a6) ;; q
+      (= 0x06 k) (play-keyboard :c1) ;; z
+      :else (println "not valid"))
   )
 
+;;(def textArea (s/text :multi-line? true :font "monaco-plain-14" :background "#000" :foreground "#0F0" :text "May the music be with you."
+;;                      ))
 
-(def textArea (s/text :multi-line? true :font "monaco-plain-14" :background "#000" :foreground "#0F0" :text "May the music be with you."
-                      ))
-
-(s/listen textArea :key-pressed (fn [e] (map-note e ))
-         )
-
+;;(s/listen textArea :key-pressed (fn [e] (map-note e ))
+;;         )
 
 (defn -main [& args]
-  (s/invoke-later
-   (-> (seesaw.core/frame :title "Life's missing sound track",
-              :content textArea,
-              :on-close :exit)
-       seesaw.core/pack!
-       seesaw.core/show!))
-  )
+  (let [ fileInput (java.io.FileInputStream. (java.io.File. (first args)))] 
+    (loop [ch (.read fileInput)]
+      (when (not= -1 ch)
+        (map-note ch)
+        (println "foo")
+        (recur (.read fileInput))))))
+;;(defn -main [& args]
+;;  (s/invoke-later
+;;   (-> (seesaw.core/frame :title "Life's missing sound track",
+;;              :content textArea,
+;;              :on-close :exit)
+;;       seesaw.core/pack!
+;;       seesaw.core/show!))
+;;  )

