@@ -47,6 +47,18 @@
       :else (println "not valid"))
   )
 
+(defn notes [start]
+  (let [hang (map note [:c4 :d4 :e4 :g4 :a4 :c5])
+        intervals (cycle (map - (rest hang) hang))]
+  (reductions + start intervals)))
+
+(defn play [inst notes]
+  (inst (midi->hz (first notes)))
+  (Thread/sleep 500)
+  (recur inst (next notes)))
+
+(into {} (map vector [0x0E 0x11 0x00 0x1F 0x22 0x2D 0x01 0x04 0x0F 0x02 0x25 0x08 0x20 0x2E 0x0D 0x03 0x05 0x10 0x23 0x0B 0x09 0x28 0x26 0x07 0x0C 0x06] (notes 60)))
+
 ;;(def textArea (s/text :multi-line? true :font "monaco-plain-14" :background "#000" :foreground "#0F0" :text "May the music be with you."
 ;;                      ))
 
