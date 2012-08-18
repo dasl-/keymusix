@@ -45,15 +45,12 @@
     )
   )
 
-(GlobalScreen/registerNativeHook)
 
 (defn myGlobalKeyListener []
   (reify
     NativeKeyListener
     (nativeKeyPressed [this event] (map-note event))))
 
-(def globalScreenInstance (GlobalScreen/getInstance))
-
-(.addNativeKeyListener globalScreenInstance (myGlobalKeyListener))
-
-(defn -main [& args] )
+(defn -main [& args]
+  (GlobalScreen/registerNativeHook)
+  (.addNativeKeyListener (GlobalScreen/getInstance) (myGlobalKeyListener)))
