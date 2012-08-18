@@ -12,7 +12,7 @@
     (* volume 1 src env)))
 
 (defn play-keyboard [ notename ]
-  (keyboard :freq (midi->hz ( note notename))))
+  (keyboard :freq (* (midi->hz ( note notename)) 4)))
 
 (defn map-note [e]
   (let [k (.getKeyCode e)]
