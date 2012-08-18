@@ -47,30 +47,15 @@
     )
   )
 
-
 (GlobalScreen/registerNativeHook)
 
 (defn myGlobalKeyListener []
   (reify
     NativeKeyListener
-    (nativeKeyReleased [this nativeKeyPressed] (map-note nativeKeyPressed))))
+    (nativeKeyPressed [this event] (map-note event))))
 
 (def globalScreenInstance (GlobalScreen/getInstance))
 
 (.addNativeKeyListener globalScreenInstance (myGlobalKeyListener))
 
-(def textArea (s/text :multi-line? true :font "monaco-plain-14" :background "#000" :foreground "#0F0" :text "May the music be with you."
-                      ))
-
-(s/listen textArea :key-pressed (fn [e] (map-note e ))
-         )
-
-
-(defn -main [& args]
-  (s/invoke-later
-   (-> (seesaw.core/frame :title "Life's missing sound track",
-              :content textArea,
-              :on-close :exit)
-       seesaw.core/pack!
-       seesaw.core/show!))
-  )
+(defn -main [& args] )
