@@ -3,7 +3,8 @@
 (require '[seesaw.core :as s])
 (import java.awt.event.KeyEvent)
 (use 'overtone.live)
-
+(import org.jnativehook.GlobalScreen)
+(import org.jnativehook.keyboard.NativeKeyListener)
 
 (definst keyboard [volume 1.0 freq 440]
   (let [src (sin-osc freq)
@@ -46,6 +47,17 @@
     )
   )
 
+
+(GlobalScreen/registerNativeHook)
+
+(defn myGlobalKeyListener []
+  (reify
+    NativeKeyListener
+    (nativeKeyReleased [this nativeKeyPressed] (map-note nativeKeyPressed))))
+
+(def globalScreenInstance (GlobalScreen/getInstance))
+
+(.addNativeKeyListener globalScreenInstance (myGlobalKeyListener))
 
 (def textArea (s/text :multi-line? true :font "monaco-plain-14" :background "#000" :foreground "#0F0" :text "May the music be with you."
                       ))

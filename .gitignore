@@ -6,3 +6,4 @@ doc/
 .DS_Store
 lib/
 .lein-deps-sum
+target/
