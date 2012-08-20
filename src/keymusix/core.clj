@@ -1,6 +1,6 @@
 (ns keymusix.core 
   (:import java.awt.event.KeyEvent)
-  (:use overtone.live)
+  (:use overtone.live overtone.inst.sampled-piano)
   (:import org.jnativehook.GlobalScreen)
   (:import org.jnativehook.keyboard.NativeKeyListener))
 
@@ -27,7 +27,7 @@
 (def seed (rand-int 997))
 
 (defn map-note [n]
-  (play-keyboard (get notes (mod (* n seed) (- (count notes) 1)))))
+  (sampled-piano (get notes (mod (bit-xor n seed) (- (count notes) 1)))))
 
 (defn myGlobalKeyListener []
   (reify
