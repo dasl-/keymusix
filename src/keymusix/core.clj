@@ -59,11 +59,6 @@
 
 (into {} (map vector [0x0E 0x11 0x00 0x1F 0x22 0x2D 0x01 0x04 0x0F 0x02 0x25 0x08 0x20 0x2E 0x0D 0x03 0x05 0x10 0x23 0x0B 0x09 0x28 0x26 0x07 0x0C 0x06] (notes 60)))
 
-;;(def textArea (s/text :multi-line? true :font "monaco-plain-14" :background "#000" :foreground "#0F0" :text "May the music be with you."
-;;                      ))
-
-;;(s/listen textArea :key-pressed (fn [e] (map-note e ))
-;;         )
 
 (defn -main [& args]
   (let [ fileInput (java.io.FileInputStream. (java.io.File. (first args)))] 
@@ -72,11 +67,3 @@
         (map-note ch)
         (println "foo")
         (recur (.read fileInput))))))
-;;(defn -main [& args]
-;;  (s/invoke-later
-;;   (-> (seesaw.core/frame :title "Life's missing sound track",
-;;              :content textArea,
-;;              :on-close :exit)
-;;       seesaw.core/pack!
-;;       seesaw.core/show!))
-;;  )
