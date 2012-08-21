@@ -27,7 +27,7 @@
 (def seed (rand-int 997))
 
 (defn map-note [n]
-  (sampled-piano (get notes (mod (bit-xor n seed) (- (count notes) 1)))))
+  (sampled-piano (get notes (mod (bit-xor (* n 269) seed) (- (count notes) 1)))))
 
 (defn myGlobalKeyListener []
   (reify
