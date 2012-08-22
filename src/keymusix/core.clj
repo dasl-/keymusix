@@ -35,6 +35,8 @@
     (nativeKeyPressed [this event] (play-note (map-note (.getKeyCode event))))))
 
 (defn -main [instnr]
+  (doseq [inst (.getInstruments sb)]
+    (println (.toString inst)))
   (.open synth)
   (.loadInstrument
     synth
