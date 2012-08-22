@@ -6,7 +6,6 @@
 (def synth (MidiSystem/getSynthesizer))
 (def ch (first (.getChannels synth)))
 (def sb (.getDefaultSoundbank synth))
-(def inst (first (.getInstruments sb)))
 
 (defn play-note [n]
   (.noteOn ch n 600))
@@ -26,9 +25,13 @@
     NativeKeyListener
     (nativeKeyPressed [this event] (map-note (.getKeyCode event)))))
 
-(defn -main [& args]
+(defn -main [instnr]
   (.open synth)
-  (.loadInstrument synth inst)
+  (.loadInstrument
+    synth
+    (nth (.getInstruments sb)
+         (Integer/parseInt instnr)))
+  (.programChange ch (Integer/parseInt instnr))
 
   (GlobalScreen/registerNativeHook)
   (.addNativeKeyListener (GlobalScreen/getInstance) (myGlobalKeyListener)))
