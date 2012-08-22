@@ -5,7 +5,6 @@
 
 (def synth (MidiSystem/getSynthesizer))
 (def ch (first (.getChannels synth)))
-(def sb (.getDefaultSoundbank synth))
 
 (def playing (atom {}))
 
@@ -34,15 +33,16 @@
     (nativeKeyReleased [this event] (stop-note (map-note (.getKeyCode event))))
     (nativeKeyPressed [this event] (play-note (map-note (.getKeyCode event))))))
 
-(defn -main [instnr]
-  (doseq [inst (.getInstruments sb)]
-    (println (.toString inst)))
-  (.open synth)
-  (.loadInstrument
-    synth
-    (nth (.getInstruments sb)
-         (Integer/parseInt instnr)))
-  (.programChange ch (Integer/parseInt instnr))
+(defn -main [soundbank nr]
+  (let [sb (MidiSystem/getSoundbank (java.io.File. soundbank))
+        nr (Integer/parseInt nr)]
+    (doseq [inst (.getInstruments sb)]
+      (println (.toString inst)))
+    (.open synth)
+    (.loadInstrument
+      synth
+      (nth (.getInstruments sb) nr))
+    (.programChange ch nr)
 
-  (GlobalScreen/registerNativeHook)
-  (.addNativeKeyListener (GlobalScreen/getInstance) (myGlobalKeyListener)))
+    (GlobalScreen/registerNativeHook)
+    (.addNativeKeyListener (GlobalScreen/getInstance) (myGlobalKeyListener))))
