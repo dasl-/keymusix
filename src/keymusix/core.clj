@@ -1,33 +1,25 @@
 (ns keymusix.core 
-  (:import java.awt.event.KeyEvent)
-  (:use overtone.live overtone.inst.sampled-piano)
+  (:import javax.sound.midi.MidiSystem)
   (:import org.jnativehook.GlobalScreen)
   (:import org.jnativehook.keyboard.NativeKeyListener))
 
-(definst keyboard [freq 440]
-  (let [src (sin-osc freq)
-        env (env-gen (perc 0.001 0.3) :action FREE)]
-    (* src env)))
+(def synth (MidiSystem/getSynthesizer))
+(def ch (first (.getChannels synth)))
+(def sb (.getDefaultSoundbank synth))
+(def inst (first (.getInstruments sb)))
 
-(defn play-keyboard [ notename ]
-  (keyboard :freq (* (midi->hz notename))))
+(defn play-note [n]
+  (.noteOn ch n 600))
 
 (defn notes [start]
-  (let [hang (map note [:c4 :d4 :e4 :g4 :a4 :c5])
-        intervals (cycle (map - (rest hang) hang))]
-  (reductions + start intervals)))
+  (reductions + start (cycle [2 2 3 2 3])))
 
-(defn play [inst notes]
-  (inst (midi->hz (first notes)))
-  (Thread/sleep 500)
-  (recur inst (next notes)))
-
-(def notes (vec (take 10 (notes 70))))
+(def notes (vec (take 10 (notes 60))))
 
 (def seed (rand-int 997))
 
 (defn map-note [n]
-  (sampled-piano (get notes (mod (bit-xor (* n 269) seed) (- (count notes) 1)))))
+  (play-note (get notes (mod (bit-xor (* n 269) seed) (- (count notes) 1)))))
 
 (defn myGlobalKeyListener []
   (reify
@@ -35,5 +27,8 @@
     (nativeKeyPressed [this event] (map-note (.getKeyCode event)))))
 
 (defn -main [& args]
+  (.open synth)
+  (.loadInstrument synth inst)
+
   (GlobalScreen/registerNativeHook)
   (.addNativeKeyListener (GlobalScreen/getInstance) (myGlobalKeyListener)))
