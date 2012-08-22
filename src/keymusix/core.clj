@@ -7,8 +7,16 @@
 (def ch (first (.getChannels synth)))
 (def sb (.getDefaultSoundbank synth))
 
+(def playing (atom {}))
+
 (defn play-note [n]
-  (.noteOn ch n 600))
+  (when-not (get @playing n) 
+    (swap! playing assoc n true)
+    (.noteOn ch n 600)))
+
+(defn stop-note [n]
+  (swap! playing assoc n false)
+  (.noteOff ch n))
 
 (defn notes [start]
   (reductions + start (cycle [2 2 3 2 3])))
@@ -18,12 +26,13 @@
 (def seed (rand-int 997))
 
 (defn map-note [n]
-  (play-note (get notes (mod (bit-xor (* n 269) seed) (- (count notes) 1)))))
+  (get notes (mod (bit-xor (* n 269) seed) (- (count notes) 1))))
 
 (defn myGlobalKeyListener []
   (reify
     NativeKeyListener
-    (nativeKeyPressed [this event] (map-note (.getKeyCode event)))))
+    (nativeKeyReleased [this event] (stop-note (map-note (.getKeyCode event))))
+    (nativeKeyPressed [this event] (play-note (map-note (.getKeyCode event))))))
 
 (defn -main [instnr]
   (.open synth)
