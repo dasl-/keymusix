@@ -1,9 +1,9 @@
 (ns keymusix.core 
-  (:import javax.sound.midi.MidiSystem)
+  (:import [javax.sound.midi MidiSystem Synthesizer Soundbank])
   (:import org.jnativehook.GlobalScreen)
   (:import org.jnativehook.keyboard.NativeKeyListener))
 
-(def synth (MidiSystem/getSynthesizer))
+(def ^Synthesizer synth (MidiSystem/getSynthesizer))
 (def ch (first (.getChannels synth)))
 
 (def playing (atom {}))
@@ -27,22 +27,31 @@
 (defn map-note [n]
   (get notes (mod (bit-xor (* n 269) seed) (- (count notes) 1))))
 
-(defn myGlobalKeyListener []
-  (reify
-    NativeKeyListener
-    (nativeKeyReleased [this event] (stop-note (map-note (.getKeyCode event))))
-    (nativeKeyPressed [this event] (play-note (map-note (.getKeyCode event))))))
+(defn listen []
+  (GlobalScreen/registerNativeHook)
+  (.addNativeKeyListener
+    (GlobalScreen/getInstance)
+    (reify
+      NativeKeyListener
+      (nativeKeyReleased [this event] (stop-note (map-note (.getKeyCode event))))
+      (nativeKeyPressed [this event] (play-note (map-note (.getKeyCode event)))))))
 
-(defn -main [soundbank nr]
-  (let [sb (MidiSystem/getSoundbank (java.io.File. soundbank))
-        nr (Integer/parseInt nr)]
-    (doseq [inst (.getInstruments sb)]
-      (println (.toString inst)))
-    (.open synth)
-    (.loadInstrument
-      synth
-      (nth (.getInstruments sb) nr))
-    (.programChange ch nr)
+(defn run
+  ([nr]
+   (.open synth)
+   (.programChange ch nr)
+   (listen))
+  ([^Soundbank soundbank bank nr]
+   (.open synth)
+   (.loadAllInstruments synth soundbank)
+   (.programChange ch bank nr)
+   (listen)))
 
-    (GlobalScreen/registerNativeHook)
-    (.addNativeKeyListener (GlobalScreen/getInstance) (myGlobalKeyListener))))
+
+(defn -main
+  ([nr] (run (Integer/parseInt nr)))
+  ([soundbank nr] (-main soundbank "0" nr))
+  ([soundbank bank nr]
+   (run (MidiSystem/getSoundbank (java.io.File. soundbank))
+        (Integer/parseInt bank)
+        (Integer/parseInt nr))))
