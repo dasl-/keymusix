@@ -4,7 +4,7 @@ A Clojure library designed to ... well, that part is up to you.
 
 ## Usage
 
-FIXME
+lein run -m keymusix.core
 
 ## License
 
