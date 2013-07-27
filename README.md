@@ -1,14 +1,21 @@
 # keymusix
 
-Don't use this branch of keymusix. Available branches:
-* jnativehook (sine tones)
+This version of keymusix uses the jnativehook library to listen for keyboard events. It uses overtone to produce sounds upon receiving those keyboard events!
+
+It is set by default to produce sine wave tones.
+
+Don't forget to checkout all of the other branches:
 * algomap (piano tones)
 * midi (any midi bank on your computer tones!)
 
-
 ## Usage
 
-this branch does not work. sorry!
+`lein run -m keymusix.core`
+
+On a mac:
+* Go to System Preferences
+* Select 'Universal Access'
+* Check the box for: Enable access for assistive devices.
 
 ## License
 
