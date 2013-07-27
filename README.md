@@ -8,6 +8,11 @@ It is set by default to play piano notes.
 
 `lein run -m keymusix.core`
 
+On a mac:
+* Go to System Preferences
+* Select 'Universal Access'
+* Check the box for: Enable access for assistive devices.
+
 ## License
 
 Copyright © 2012 FIXME
