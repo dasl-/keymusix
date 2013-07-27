@@ -1,10 +1,10 @@
 # keymusix
 
-A Clojure library designed to ... well, that part is up to you.
+keymusix that operates using midi soundbanks on your computer!
 
 ## Usage
 
-FIXME
+`lein run -m keymusix.core INT`, where `INT` is the number of a midi soundbank on your computer
 
 ## License
 
