@@ -1,10 +1,14 @@
 # keymusix
 
-A Clojure library designed to ... well, that part is up to you.
+Don't use this branch of keymusix. Available branches:
+* jnativehook (sine tones)
+* algomap (piano tones)
+* midi (any midi bank on your computer tones!)
+
 
 ## Usage
 
-lein run -m keymusix.core
+this branch does not work. sorry!
 
 ## License
 
