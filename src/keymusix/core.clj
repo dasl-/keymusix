@@ -5,7 +5,8 @@
   (:import org.jnativehook.GlobalScreen)
   (:import org.jnativehook.keyboard.NativeKeyListener)
   (:use quil.core)
-  (:require [quil.applet :refer (current-applet)]))
+  (:use [quil.applet])
+  (:gen-class))
 
 (def circles (atom []))
 

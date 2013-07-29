@@ -3,7 +3,8 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.4.0"]
-                 [overtone "0.7.1"]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [overtone "0.8.1"]
                  [org.clojars.pepijndevos/jnativehook "1.1.0_rc3"]
-                 [quil "1.6.0"]])
+                 [quil "1.6.0"]]
+  :main keymusix.core)

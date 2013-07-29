@@ -4,7 +4,7 @@ This is an extension of the master branch. It will draw circles to the canvas us
 
 ## Usage
 
-`lein run -m keymusix.core`
+`lein run`
 
 On a mac:
 * Go to System Preferences
