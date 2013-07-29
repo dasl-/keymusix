@@ -1,8 +1,9 @@
-(ns keymusix.core 
+(ns keymusix.core
   (:import java.awt.event.KeyEvent)
   (:use overtone.live overtone.inst.sampled-piano)
   (:import org.jnativehook.GlobalScreen)
-  (:import org.jnativehook.keyboard.NativeKeyListener))
+  (:import org.jnativehook.keyboard.NativeKeyListener)
+  (:gen-class))
 
 (definst keyboard [freq 440]
   (let [src (sin-osc freq)

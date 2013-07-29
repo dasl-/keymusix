@@ -6,7 +6,7 @@ It is set by default to play piano notes.
 
 ## Usage
 
-`lein run -m keymusix.core`
+`lein run`
 
 On a mac:
 * Go to System Preferences
