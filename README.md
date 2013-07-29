@@ -11,7 +11,7 @@ Don't forget to checkout all of the other branches:
 
 ## Usage
 
-`lein run -m keymusix.core`
+`lein run`
 
 On a mac:
 * Go to System Preferences
