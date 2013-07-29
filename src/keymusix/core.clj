@@ -1,7 +1,8 @@
-(ns keymusix.core 
+(ns keymusix.core
   (:import [javax.sound.midi MidiSystem Synthesizer Soundbank])
   (:import org.jnativehook.GlobalScreen)
-  (:import org.jnativehook.keyboard.NativeKeyListener))
+  (:import org.jnativehook.keyboard.NativeKeyListener)
+  (:gen-class))
 
 (def ^Synthesizer synth (MidiSystem/getSynthesizer))
 (def ch (first (.getChannels synth)))
@@ -9,7 +10,7 @@
 (def playing (atom {}))
 
 (defn play-note [n]
-  (when-not (get @playing n) 
+  (when-not (get @playing n)
     (swap! playing assoc n true)
     (.noteOn ch n 600)))
 
@@ -49,6 +50,7 @@
 
 
 (defn -main
+  ([] (run 0))
   ([nr] (run (Integer/parseInt nr)))
   ([soundbank nr] (-main soundbank "0" nr))
   ([soundbank bank nr]
