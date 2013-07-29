@@ -1,4 +1,5 @@
 (ns keymusix.core
+  (:gen-class)
   (:import java.awt.event.KeyEvent)
   (:use overtone.live)
   (:import org.jnativehook.GlobalScreen)
