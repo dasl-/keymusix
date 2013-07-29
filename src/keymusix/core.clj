@@ -1,16 +1,57 @@
 (ns keymusix.core
+  (:require [clojure.core])
   (:import java.awt.event.KeyEvent)
-  (:use overtone.live)
+  (:require [overtone.live :as ot])
   (:import org.jnativehook.GlobalScreen)
-  (:import org.jnativehook.keyboard.NativeKeyListener))
+  (:import org.jnativehook.keyboard.NativeKeyListener)
+  (:use quil.core)
+  (:require [quil.applet :refer (current-applet)]))
 
-(definst keyboard [volume 1.0 freq 440]
-  (let [src (sin-osc freq)
-        env (env-gen (perc 0.001 0.3) :action FREE)]
+(def circles (atom []))
+
+(ot/definst keyboard [volume 1.0 freq 440]
+  (let [src (ot/sin-osc freq)
+        env (ot/env-gen (ot/perc 0.001 0.3) :action ot/FREE)]
     (* volume 1 src env)))
 
-(defn play-keyboard [ notename ]
-  (keyboard :freq (* (midi->hz ( note notename)) 4)))
+(defn new-circle []
+  (let [
+        r (rand-int 255)
+        g (rand-int 255)
+        b (rand-int 255)
+        x (rand-int (screen-width))
+        y (rand-int (screen-height))
+        diameter (+ 15 (rand-int 50))
+        stroke-r (rand-int 255)
+        stroke-g (rand-int 255)
+        stroke-b (rand-int 255)
+        stroke-weight (rand-int 10)
+        speed (+ 0.3 (rand 1.7))
+       ]
+    {
+     :color [r g b],
+     :x x,
+     :y y,
+     :original-diameter diameter
+     :diameter diameter
+     :stroke [stroke-r stroke-g stroke-b]
+     :stroke-weight stroke-weight
+     :increasing true
+     :speed speed
+    }
+  )
+
+)
+
+(defn insert-circle []
+  (swap! circles assoc (count @circles) (new-circle))
+)
+
+(defn play-keyboard [notename]
+  (keyboard :freq (* (ot/midi->hz (ot/note notename)) 4))
+  (insert-circle)
+)
+
 
 (defn map-note [e]
   (let [k (.getKeyCode e)]
@@ -52,16 +93,92 @@
       (= KeyEvent/VK_7 k) (play-keyboard :e3)
       (= KeyEvent/VK_8 k) (play-keyboard :g3)
       (= KeyEvent/VK_9 k) (play-keyboard :a3)
-
-      )
     )
   )
-
+)
 
 (defn myGlobalKeyListener []
   (reify
     NativeKeyListener
     (nativeKeyPressed [this event] (map-note event))))
+
+
+
+
+; quil stuff
+
+(defn update-circle [circle]
+  (if (> (:diameter circle) (* 2 (:original-diameter circle)))
+    (assoc circle :increasing false :diameter (dec (:diameter circle)))
+    (if (:increasing circle)
+      (assoc circle :diameter (+ (:diameter circle) (:speed circle)))
+      (assoc circle :diameter (- (:diameter circle) (:speed circle))))))
+
+(defn wait-event-dispatch-thread
+  "Blocks current thread until all events in AWT event dispatch thread are processed."
+   []
+   (javax.swing.SwingUtilities/invokeAndWait (fn [])))
+
+(defn fullscreen []
+  (wait-event-dispatch-thread) ; Wait until size set from :size
+  (let [screen (.screen (current-applet))]
+    (.size (current-applet) (.width screen) (.height screen)))
+  (wait-event-dispatch-thread) ; Wait until new size is set
+)
+
+(defn setup []
+  (smooth)                          ;;Turn on anti-aliasing
+  (frame-rate 60)                    ;;Set framerate to 1 FPS
+  (background 0)                 ;;Set the background colour to a nice shade of grey.
+  (fullscreen)                    ; hack to make it full screen
+)
+
+(defn draw []
+  (background 0)
+  (doseq [circle @circles]
+      (apply stroke (:stroke circle))
+      (stroke-weight (:stroke-weight circle))
+      (apply fill (:color circle))
+      (apply ellipse [(:x circle) (:y circle) (:diameter circle) (:diameter circle)])
+  )
+
+  (reset! circles (vec (map update-circle @circles)))
+  (reset! circles (vec (filter (fn [circle] (> (:diameter circle) 0)) @circles)))
+
+
+
+  ; (doseq [circle @circles]
+  ;     (stroke (get circle :stroke))
+  ;     (stroke-weight (get circle :stroke-weight))
+  ;     (apply fill (get circle :color))
+  ;     (apply ellipse [(get circle :x) (get circle :y) (get circle :diameter) (get circle :diameter)])
+  ; )
+
+  ; (stroke (random 255))             ;;Set the stroke colour to a random grey
+  ; (stroke-weight (random 10))       ;;Set the stroke thickness randomly
+  ; (fill (random 255))               ;;Set the fill colour to a random grey
+
+  ; (let [diam (random 100)           ;;Set the diameter to a value between 0 and 100
+  ;       x    (random (width))       ;;Set the x coord randomly within the sketch
+  ;       y    (random (height))]     ;;Set the y coord randomly within the sketch
+  ;   (ellipse x y diam diam)       ;;Draw a circle at x y with the correct diameter
+  ; )
+)
+
+; (defn increase-circle-size [circles]
+;  (map circles (fn (c) (assoc c :rad (inc (:rad c))) )))
+
+(defsketch example                  ;;Define a new sketch named example
+  :title "may algorithmic beauty pour forth from your fingertips today"  ;;Set the title of the sketch
+  :setup setup                      ;;Specify the setup fn
+  :draw draw                        ;;Specify the draw fn
+)
+
+; end quil stuff
+
+
+
+
 
 (defn -main [& args]
   (GlobalScreen/registerNativeHook)

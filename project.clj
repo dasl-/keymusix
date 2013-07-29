@@ -5,4 +5,5 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [overtone "0.7.1"]
-                 [org.clojars.pepijndevos/jnativehook "1.1.0_rc3"]])
+                 [org.clojars.pepijndevos/jnativehook "1.1.0_rc3"]
+                 [quil "1.6.0"]])

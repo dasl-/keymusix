@@ -1,12 +1,6 @@
 # keymusix
 
-This version of keymusix uses the jnativehook library to listen for keyboard events. It uses overtone to produce sounds upon receiving those keyboard events!
-
-It is set by default to produce sine wave tones.
-
-Don't forget to checkout all of the other branches:
-* algomap (piano tones)
-* midi (any midi bank on your computer tones!)
+This is an extension of the master branch. It will draw circles to the canvas using Quil upon receiving a keypress event.
 
 ## Usage
 
