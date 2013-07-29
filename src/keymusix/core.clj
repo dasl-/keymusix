@@ -33,12 +33,11 @@
      :color [r g b],
      :x x,
      :y y,
-     :original-diameter diameter
      :diameter diameter
      :stroke [stroke-r stroke-g stroke-b]
      :stroke-weight stroke-weight
-     :increasing true
      :speed speed
+     :alpha 255
     }
   )
 
@@ -109,11 +108,7 @@
 ; quil stuff
 
 (defn update-circle [circle]
-  (if (> (:diameter circle) (* 2 (:original-diameter circle)))
-    (assoc circle :increasing false :diameter (dec (:diameter circle)))
-    (if (:increasing circle)
-      (assoc circle :diameter (+ (:diameter circle) (:speed circle)))
-      (assoc circle :diameter (- (:diameter circle) (:speed circle))))))
+  (assoc circle :diameter (+ (:diameter circle) (:speed circle)) :alpha (- (:alpha circle) (:speed circle))))
 
 (defn wait-event-dispatch-thread
   "Blocks current thread until all events in AWT event dispatch thread are processed."
@@ -137,14 +132,14 @@
 (defn draw []
   (background 0)
   (doseq [circle @circles]
-      (apply stroke (:stroke circle))
+      (apply stroke (conj (:stroke circle) (:alpha circle)))
       (stroke-weight (:stroke-weight circle))
-      (apply fill (:color circle))
+      (apply fill (conj (:color circle) (:alpha circle)))
       (apply ellipse [(:x circle) (:y circle) (:diameter circle) (:diameter circle)])
   )
 
   (reset! circles (vec (map update-circle @circles)))
-  (reset! circles (vec (filter (fn [circle] (> (:diameter circle) 0)) @circles)))
+  (reset! circles (vec (filter (fn [circle] (> (:alpha circle) 0)) @circles)))
 
 
 
