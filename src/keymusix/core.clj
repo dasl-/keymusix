@@ -8,6 +8,21 @@
   (:use [quil.applet])
   (:gen-class))
 
+(def mute (atom {:m false :escape false :mute false}))
+
+(defn check-mute-shortcut [e e-type]
+  (let [k (.getKeyCode e)]
+    (if (= e-type "press")
+      (cond
+       (= KeyEvent/VK_M k) (swap! mute assoc :m true)
+       (= KeyEvent/VK_ESCAPE k) (swap! mute assoc :escape true))
+      (if (= e-type "release")
+        (cond
+          (= KeyEvent/VK_M k) ((swap! mute assoc :m false))
+          (= KeyEvent/VK_ESCAPE k) (swap! mute assoc :escape false)))))
+  (if (and (= true (:m @mute)) (= true (:escape @mute)))
+    (swap! mute assoc :mute (not (:mute @mute)))))
+
 (def halos (atom []))
 
 (def dots (atom []))
@@ -54,7 +69,8 @@
 )
 
 (defn do-key-event [note color]
-  (play-keyboard note)
+  (if (not (:mute @mute))
+    (play-keyboard note))
 
   (let [x (rand-int (screen-width))
         y (rand-int (screen-height))]
@@ -131,19 +147,13 @@
       (= KeyEvent/VK_UP k)            (do-key-event :c3 [255 200 167])
       (= KeyEvent/VK_RIGHT k)         (do-key-event :d3 [255 212 206])
       (= KeyEvent/VK_DOWN k)          (do-key-event :e3 [254 223 205])
-      (= KeyEvent/VK_LEFT k)          (do-key-event :g3 [255 236 206])
-
-    )
-  )
-)
+      (= KeyEvent/VK_LEFT k)          (do-key-event :g3 [255 236 206])))
+  (check-mute-shortcut e "press"))
 
 (defn myGlobalKeyListener []
-  (reify
-    NativeKeyListener
-    (nativeKeyPressed [this event] (map-note-and-color event))))
-
-
-
+  (reify NativeKeyListener
+    (nativeKeyPressed [this event] (map-note-and-color event))
+    (nativeKeyReleased [this event] (check-mute-shortcut event "release"))))
 
 ; quil stuff
 
