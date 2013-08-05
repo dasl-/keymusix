@@ -8,20 +8,17 @@
   (:use [quil.applet])
   (:gen-class))
 
-(def circles (atom []))
+(def halos (atom []))
+
+(def dots (atom []))
 
 (ot/definst keyboard [volume 1.0 freq 440]
   (let [src (ot/sin-osc freq)
         env (ot/env-gen (ot/perc 0.001 0.3) :action ot/FREE)]
     (* volume 1 src env)))
 
-(defn new-circle []
+(defn new-halo [x y color]
   (let [
-        r (rand-int 255)
-        g (rand-int 255)
-        b (rand-int 255)
-        x (rand-int (screen-width))
-        y (rand-int (screen-height))
         diameter (+ 15 (rand-int 50))
         stroke-r (rand-int 255)
         stroke-g (rand-int 255)
@@ -30,7 +27,7 @@
         speed (+ 0.3 (rand 1.7))
        ]
     {
-     :color [r g b],
+     :color color,
      :x x,
      :y y,
      :diameter diameter
@@ -38,61 +35,104 @@
      :stroke-weight stroke-weight
      :speed speed
      :alpha 255
-    }
-  )
+     }))
 
-)
+(defn new-dot [x y color]
+  {:color color
+   :x x
+   :y y
+   :diameter 3})
 
-(defn insert-circle []
-  (swap! circles assoc (count @circles) (new-circle))
-)
+(defn insert-halo [x y color]
+  (swap! halos assoc (count @halos) (new-halo x y color)))
+
+(defn insert-dot [x y color]
+  (swap! dots assoc (count @dots) (new-dot x y color)))
 
 (defn play-keyboard [notename]
   (keyboard :freq (* (ot/midi->hz (ot/note notename)) 4))
-  (insert-circle)
 )
 
+(defn do-key-event [note color]
+  (play-keyboard note)
 
-(defn map-note [e]
+  (let [x (rand-int (screen-width))
+        y (rand-int (screen-height))]
+    (insert-halo x y color)
+    (insert-dot x y color)))
+
+; keycodes: http://code.google.com/p/jnativehook/source/browse/trunk/src/java/org/jnativehook/keyboard/NativeKeyEvent.java
+(defn map-note-and-color [e]
   (let [k (.getKeyCode e)]
     (cond
-      (= KeyEvent/VK_E k) (play-keyboard :c4)
-      (= KeyEvent/VK_T k) (play-keyboard :d4)
-      (= KeyEvent/VK_A k) (play-keyboard :e4)
-      (= KeyEvent/VK_O k) (play-keyboard :g4)
-      (= KeyEvent/VK_I k) (play-keyboard :a4)
-      (= KeyEvent/VK_N k) (play-keyboard :c3)
-      (= KeyEvent/VK_S k) (play-keyboard :d3)
-      (= KeyEvent/VK_H k) (play-keyboard :e3)
-      (= KeyEvent/VK_R k) (play-keyboard :g3)
-      (= KeyEvent/VK_D k) (play-keyboard :a3)
-      (= KeyEvent/VK_L k) (play-keyboard :c5)
-      (= KeyEvent/VK_C k) (play-keyboard :d5)
-      (= KeyEvent/VK_U k) (play-keyboard :e5)
-      (= KeyEvent/VK_M k) (play-keyboard :g5)
-      (= KeyEvent/VK_W k) (play-keyboard :a5)
-      (= KeyEvent/VK_F k) (play-keyboard :c2)
-      (= KeyEvent/VK_G k) (play-keyboard :d2)
-      (= KeyEvent/VK_Y k) (play-keyboard :e2)
-      (= KeyEvent/VK_P k) (play-keyboard :g2)
-      (= KeyEvent/VK_B k) (play-keyboard :a2)
-      (= KeyEvent/VK_V k) (play-keyboard :c6)
-      (= KeyEvent/VK_K k) (play-keyboard :d6)
-      (= KeyEvent/VK_J k) (play-keyboard :e6)
-      (= KeyEvent/VK_X k) (play-keyboard :g6)
-      (= KeyEvent/VK_Q k) (play-keyboard :a6)
-      (= KeyEvent/VK_Z k) (play-keyboard :c1)
+      (= KeyEvent/VK_E k) (do-key-event :c4 [0 93 182])
+      (= KeyEvent/VK_T k) (do-key-event :d4 [0 171 174])
+      (= KeyEvent/VK_A k) (do-key-event :e4 [54 52 229])
+      (= KeyEvent/VK_O k) (do-key-event :g4 [142 179 0])
+      (= KeyEvent/VK_I k) (do-key-event :a4 [15 182 0])
+      (= KeyEvent/VK_N k) (do-key-event :c3 [102 250 166])
+      (= KeyEvent/VK_S k) (do-key-event :d3 [1 83 249])
+      (= KeyEvent/VK_H k) (do-key-event :e3 [0 248 166])
+      (= KeyEvent/VK_R k) (do-key-event :g3 [0 135 180])
+      (= KeyEvent/VK_D k) (do-key-event :a3 [0 143 245])
+      (= KeyEvent/VK_L k) (do-key-event :c5 [226 245 0])
+      (= KeyEvent/VK_C k) (do-key-event :d5 [99 200 248])
+      (= KeyEvent/VK_U k) (do-key-event :e5 [0 182 62])
+      (= KeyEvent/VK_M k) (do-key-event :g5 [98 249 104])
+      (= KeyEvent/VK_W k) (do-key-event :a5 [2 47 183])
+      (= KeyEvent/VK_F k) (do-key-event :c2 [0 198 240])
+      (= KeyEvent/VK_G k) (do-key-event :d2 [0 242 232])
+      (= KeyEvent/VK_Y k) (do-key-event :e2 [0 183 137])
+      (= KeyEvent/VK_P k) (do-key-event :g2 [192 163 0])
+      (= KeyEvent/VK_B k) (do-key-event :a2 [97 251 226])
+      (= KeyEvent/VK_V k) (do-key-event :c6 [97 231 244])
+      (= KeyEvent/VK_K k) (do-key-event :d6 [88 247 0])
+      (= KeyEvent/VK_J k) (do-key-event :e6 [0 248 63])
+      (= KeyEvent/VK_X k) (do-key-event :g6 [104 161 251])
+      (= KeyEvent/VK_Q k) (do-key-event :a6 [43 32 158])
+      (= KeyEvent/VK_Z k) (do-key-event :c1 [107 125 245])
 
-      (= KeyEvent/VK_0 k) (play-keyboard :c4)
-      (= KeyEvent/VK_1 k) (play-keyboard :d4)
-      (= KeyEvent/VK_2 k) (play-keyboard :e4)
-      (= KeyEvent/VK_3 k) (play-keyboard :g4)
-      (= KeyEvent/VK_4 k) (play-keyboard :a4)
-      (= KeyEvent/VK_5 k) (play-keyboard :c3)
-      (= KeyEvent/VK_6 k) (play-keyboard :d3)
-      (= KeyEvent/VK_7 k) (play-keyboard :e3)
-      (= KeyEvent/VK_8 k) (play-keyboard :g3)
-      (= KeyEvent/VK_9 k) (play-keyboard :a3)
+      (= KeyEvent/VK_0 k) (do-key-event :a6 [111 108 0])
+      (= KeyEvent/VK_1 k) (do-key-event :c5 [45 13 80])
+      (= KeyEvent/VK_2 k) (do-key-event :d5 [7 16 102])
+      (= KeyEvent/VK_3 k) (do-key-event :e5 [0 40 111])
+      (= KeyEvent/VK_4 k) (do-key-event :g5 [0 65 105])
+      (= KeyEvent/VK_5 k) (do-key-event :a5 [0 92 104])
+      (= KeyEvent/VK_6 k) (do-key-event :c6 [0 107 99])
+      (= KeyEvent/VK_7 k) (do-key-event :d6 [0 109 58])
+      (= KeyEvent/VK_8 k) (do-key-event :e6 [0 109 2])
+      (= KeyEvent/VK_9 k) (do-key-event :g6 [52 107 0])
+
+      (= KeyEvent/VK_ENTER k)         (do-key-event :c4 [255 78 0])
+      (= KeyEvent/VK_BACK_SPACE k)    (do-key-event :d4 [114 25 0]) ; delete key on mac
+      (= KeyEvent/VK_TAB k)           (do-key-event :e4 [110 26 104])
+      (= KeyEvent/VK_SHIFT k)         (do-key-event :g4 [176 122 193])
+      ; (= KeyEvent/VK_CONTROL k) unfortunately the control key maps to the same keycode as SHIFT on a mac :(
+      ; (= KeyEvent/VK_ALT k) (do-key-event :a3) unfortunately the option/alt key maps to the same keycode as
+        ; SHIFT on a mac :(
+      (= KeyEvent/VK_META k)          (do-key-event :a4 [233 252 184]) ; maps to the right command key on a mac
+        ;(left command key maps to same keycode as SHIFT :( )
+      (= KeyEvent/VK_ESCAPE k)        (do-key-event :c3 [21 0 10])
+      (= KeyEvent/VK_SPACE k)         (do-key-event :d3 [188 254 239])
+      (= KeyEvent/VK_CAPS_LOCK k)     (do-key-event :e3 [147 42 146])
+
+      (= KeyEvent/VK_COMMA k)         (do-key-event :g3 [196 248 101])
+      (= KeyEvent/VK_MINUS k)         (do-key-event :a3 [113 84 0])
+      (= KeyEvent/VK_PERIOD k)        (do-key-event :c2 [253 238 102])
+      (= KeyEvent/VK_SLASH k)         (do-key-event :d2 [255 205 101])
+      (= KeyEvent/VK_EQUALS k)        (do-key-event :e2 [111 58 0])
+      (= KeyEvent/VK_SEMICOLON k)     (do-key-event :g2 [255 206 0])
+      (= KeyEvent/VK_OPEN_BRACKET k)  (do-key-event :a2 [190 124 0])
+      (= KeyEvent/VK_BACK_SLASH k)    (do-key-event :c4 [191 37 0])
+      (= KeyEvent/VK_CLOSE_BRACKET k) (do-key-event :d4 [190 81 0])
+      (= KeyEvent/VK_QUOTE k)         (do-key-event :e4 [255 156 0])
+      (= KeyEvent/VK_BACK_QUOTE k)    (do-key-event :g4 [78 9 44])
+
+      (= KeyEvent/VK_UP k)            (do-key-event :c3 [255 200 167])
+      (= KeyEvent/VK_RIGHT k)         (do-key-event :d3 [255 212 206])
+      (= KeyEvent/VK_DOWN k)          (do-key-event :e3 [254 223 205])
+      (= KeyEvent/VK_LEFT k)          (do-key-event :g3 [255 236 206])
+
     )
   )
 )
@@ -100,15 +140,15 @@
 (defn myGlobalKeyListener []
   (reify
     NativeKeyListener
-    (nativeKeyPressed [this event] (map-note event))))
+    (nativeKeyPressed [this event] (map-note-and-color event))))
 
 
 
 
 ; quil stuff
 
-(defn update-circle [circle]
-  (assoc circle :diameter (+ (:diameter circle) (:speed circle)) :alpha (- (:alpha circle) (:speed circle))))
+(defn update-halo [halo]
+  (assoc halo :diameter (+ (:diameter halo) (:speed halo)) :alpha (- (:alpha halo) (:speed halo))))
 
 (defn wait-event-dispatch-thread
   "Blocks current thread until all events in AWT event dispatch thread are processed."
@@ -131,50 +171,29 @@
 
 (defn draw []
   (background 0)
-  (doseq [circle @circles]
-      (apply stroke (conj (:stroke circle) (:alpha circle)))
-      (stroke-weight (:stroke-weight circle))
-      (apply fill (conj (:color circle) (:alpha circle)))
-      (apply ellipse [(:x circle) (:y circle) (:diameter circle) (:diameter circle)])
-  )
 
-  (reset! circles (vec (map update-circle @circles)))
-  (reset! circles (vec (filter (fn [circle] (> (:alpha circle) 0)) @circles)))
+  (doseq [halo @halos]
+      (apply stroke (conj (:stroke halo) (:alpha halo)))
+      (stroke-weight (:stroke-weight halo))
+      (apply fill (conj (:color halo) (:alpha halo)))
+      (apply ellipse [(:x halo) (:y halo) (:diameter halo) (:diameter halo)]))
 
+  (reset! halos (vec (map update-halo @halos)))
+  (reset! halos (vec (filter (fn [halo] (> (:alpha halo) 0)) @halos)))
 
+  (doseq [dot @dots]
+    (stroke 0)
+    (stroke-weight 0)
+    (apply fill (:color dot))
+    (apply ellipse [(:x dot) (:y dot) (:diameter dot) (:diameter dot)])))
 
-  ; (doseq [circle @circles]
-  ;     (stroke (get circle :stroke))
-  ;     (stroke-weight (get circle :stroke-weight))
-  ;     (apply fill (get circle :color))
-  ;     (apply ellipse [(get circle :x) (get circle :y) (get circle :diameter) (get circle :diameter)])
-  ; )
-
-  ; (stroke (random 255))             ;;Set the stroke colour to a random grey
-  ; (stroke-weight (random 10))       ;;Set the stroke thickness randomly
-  ; (fill (random 255))               ;;Set the fill colour to a random grey
-
-  ; (let [diam (random 100)           ;;Set the diameter to a value between 0 and 100
-  ;       x    (random (width))       ;;Set the x coord randomly within the sketch
-  ;       y    (random (height))]     ;;Set the y coord randomly within the sketch
-  ;   (ellipse x y diam diam)       ;;Draw a circle at x y with the correct diameter
-  ; )
-)
-
-; (defn increase-circle-size [circles]
-;  (map circles (fn (c) (assoc c :rad (inc (:rad c))) )))
-
-(defsketch example                  ;;Define a new sketch named example
-  :title "may algorithmic beauty pour forth from your fingertips today"  ;;Set the title of the sketch
-  :setup setup                      ;;Specify the setup fn
-  :draw draw                        ;;Specify the draw fn
+(defsketch seurat
+  :title "may algorithmic beauty pour forth from your fingertips today"
+  :setup setup
+  :draw draw
 )
 
 ; end quil stuff
-
-
-
-
 
 (defn -main [& args]
   (GlobalScreen/registerNativeHook)
