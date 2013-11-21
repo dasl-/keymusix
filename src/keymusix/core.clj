@@ -33,6 +33,8 @@
 (defn myGlobalKeyListener []
   (reify
     NativeKeyListener
+    (nativeKeyReleased [this event])
+    (nativeKeyTyped [this event])
     (nativeKeyPressed [this event] (map-note (.getKeyCode event)))))
 
 (defn -main [& args]
